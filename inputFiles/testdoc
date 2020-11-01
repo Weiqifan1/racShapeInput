@@ -1,0 +1,39 @@
+﻿a 日
+b 月
+c 金
+s 尸
+t 廿
+u 山
+v 女
+w 田
+x 難
+y 卜
+z 重
+END_CHAR_PROMPTS_DEFINITION
+END_DEFINITION
+
+### Begin Table data.
+BEGIN_TABLE
+###aaaa    󼄌
+###aaag    󼓗
+###aaak    󼁿
+###aaej    󼟰
+###aaf     󼝖
+###aaf     󼾈
+###aahxu   󻣴
+###aaja    󻻇
+###aaja    󼄄
+###aaks    󽡷
+aning   𨴘
+aniok   𨴱
+aniq    曻
+anir    㫥
+anirm   閾
+anism   𨴌
+anit    閞
+zxcu    ”
+zxcv    〝
+zxcw    〞
+zxcx    ‵
+zxcy    ′
+END_TABLE
