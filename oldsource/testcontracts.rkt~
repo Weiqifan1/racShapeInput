@@ -1,0 +1,38 @@
+#lang racket
+(require racket/contract)
+
+(struct posn (x y))
+ 
+(provide (contract-out
+          [struct posn ((x number?) (y number?))]
+          [p-okay posn?]
+          [p-sick posn?]))
+ 
+(define p-okay (posn 10 20))
+(define p-sick (posn 'a 'b))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;slut
