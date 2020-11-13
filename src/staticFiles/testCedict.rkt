@@ -34,6 +34,9 @@
 (+ 3 3)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;TODO>
+;1 check if a  junda and tzai characters are in cedict
+;2 add the junda and tzai proportions for each char to the cidtionaries
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
