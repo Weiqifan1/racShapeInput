@@ -1,0 +1,285 @@
+#lang racket
+
+(require "Junda.rkt" "Tzai.rkt")
+;(require racket/serialize) ;used for serializing data - look at the bottom of the file
+(require racket/fasl)
+
+;(length (hash-values tzaihash))
+;(length (hash-values jundahash))
+
+(define (cedictHashGen fun_chooseKey str_cedictFileContent)
+  (hashFromCedict fun_chooseKey
+  (filter (lambda (li_str_each) (< 3 (length li_str_each)))
+  (map (lambda (str_eachLine) (regexp-split #rx"###" str_eachLine)) 
+  (regexp-split #rx"\n" str_cedictFileContent)))))
+
+(define (hashFromCedict fun_chooseKey li_li_str_codeAndChinese)
+  (for/hash ([li_str_each li_li_str_codeAndChinese])
+    (values (fun_chooseKey li_str_each) li_str_each)))
+
+;(define cedictHashTradKey
+;  (cedictHashGen first cedict))
+
+;(define cedictHashSimpKey
+;  (cedictHashGen second cedict))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; functions to create nested Cedict lists ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;create a nested list with all the cedict lines
+(define (cedictNestedList str_cedictFileContent)
+  ;;(map (lambda (li_listOfStrings) (list (fun_chooseKey li_listOfStrings) li_listOfStrings)) 
+  (filter (lambda (li_str_each) (< 3 (length li_str_each)))
+  (map (lambda (str_eachLine) (regexp-split #rx"###" str_eachLine))
+       (regexp-split #rx"\n" str_cedictFileContent))))
+
+(define (replaceCounterpartWithList
+         fun_whichToCompare
+         fun_whichToAppend       
+         li_li_str_codeAndChinese)
+  (map (lambda (li_str_each)
+         (list (fun_whichToCompare li_str_each)
+               (filterAndCombineCounterparts
+                (fun_whichToCompare li_str_each)
+                fun_whichToCompare
+                fun_whichToAppend
+                li_li_str_codeAndChinese)))
+   li_li_str_codeAndChinese))
+
+(define (filterAndCombineCounterparts
+         str_matchToPair
+         fun_whichToCompare
+         fun_whichToAppend       
+         li_li_str_codeAndChinese)
+  (combineRemainingCounterparts
+   fun_whichToAppend
+  (filterCounterpartMatches
+   str_matchToPair
+   fun_whichToCompare
+   li_li_str_codeAndChinese)))
+
+(define (combineRemainingCounterparts
+         fun_whichToAppend
+         li_li_str_codeKinPair)
+  (map (lambda (li_str_each)
+         (fun_whichToAppend li_str_each))
+       li_li_str_codeKinPair))
+
+(define (filterCounterpartMatches
+         str_matchToPair
+         fun_whichToCompare
+         li_li_str_codeKinPair)
+  (filter (lambda (li_str_each)
+            (equal? str_matchToPair (fun_whichToCompare li_str_each)))
+   li_li_str_codeKinPair))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; functions to add unicode and serialnumbers to cedict info;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;write a function that takes a string and return a list of junda or tzai serialnumbers
+(define (charsToFrequency hash_frequencySystem str_inputString)
+  (if (and (string? str_inputString)
+           (< 0 (string-length str_inputString)))
+      (map
+       (lambda (char_eachChar)
+         (if (hash-has-key? hash_frequencySystem (string char_eachChar))
+             (hash-ref hash_frequencySystem (string char_eachChar))
+             0))  
+           (string->list str_inputString))
+      '()))
+
+;(charsToFrequency jundahash "ab𠁆Ʃ子")
+;(charsToFrequency tzaihash "ab𠁆Ʃ子")
+;(hash-has-key? tzaihash "子")
+
+;write a function that takes a string and return a list of unicode codepoints
+
+(define (charsToUnicode str_inputString)
+  (if (and (string? str_inputString)
+           (< 0 (string-length str_inputString)))
+      (map
+       (lambda (char_eachChar) (char->integer (string-ref (string char_eachChar) 0)))  
+           (string->list str_inputString))
+      '()))
+;string-split str_inputString #rx"(?<=.)(?=.)"
+;(char->integer (string-ref "Ʃ" 0))
+;(char->integer (string-ref "𠁆" 0))
+;(charsToUnicode "𠁆")
+;(charsToUnicode "ab𠁆Ʃ")
+
+;write a function that takes a string and return a list of either serialnumbers or codepoints X 10.
+(define (charsToComparisonNums hash_frequencySystem str_inputString)
+  (if (and (string? str_inputString)
+           (< 0 (string-length str_inputString))) 
+      ;(filter (lambda (int_eachInt) (< 0 int_eachInt)) 
+      (map
+       (lambda (char_eachChar)
+         (charToComparisonNum hash_frequencySystem char_eachChar))
+           (string->list str_inputString))
+      '()))
+
+(define (charToComparisonNum hash_frequencySystem char_input)
+  (let* ([isChinese (< 11900 (char->integer char_input))]
+         [isInFrecSystem (hash-has-key? hash_frequencySystem (string char_input))])
+   
+    (if isChinese
+        (if isInFrecSystem
+            (hash-ref hash_frequencySystem (string char_input))
+            (* 10 (char->integer char_input)))
+        0)))
+
+;(charsToComparisonNums jundahash "𠁆")
+;(charsToComparisonNums jundahash "ab𠁆Ʃ子")
+;(charsToComparisonNums tzaihash "𠁆")
+;(charsToComparisonNums tzaihash "ab𠁆Ʃ子")
+
+(define (charsToFreqSystemNums hash_frequencySystem str_inputString)
+  (if (and (string? str_inputString)
+           (< 0 (string-length str_inputString))) 
+      ;(filter (lambda (int_eachInt) (< 0 int_eachInt)) 
+      (map
+       (lambda (char_eachChar)
+         (charToFreqSystemNum hash_frequencySystem char_eachChar))
+           (string->list str_inputString))
+      '()))
+  
+
+(define (charToFreqSystemNum hash_frequencySystem char_input)
+  (let* ([isChinese (< 11900 (char->integer char_input))]
+         [isInFrecSystem (hash-has-key? hash_frequencySystem (string char_input))])
+   
+    (if isChinese
+        (if isInFrecSystem
+            (hash-ref hash_frequencySystem (string char_input))
+            0)
+        0)))
+;(charsToFreqSystemNums jundahash "ab𠁆Ʃ子")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;create a function that adds lists of unicode, jundaCount and tzaiCount to the cedict nested list  
+(define (nestedCedictToListHashMap hash_frequencySystem li_li_cedict)
+  (map
+   (lambda (li_eachLine)
+     (let* ([lineKey (first li_eachLine)]
+            [lineValue (second li_eachLine)])
+       (list lineKey
+             (hash 'key lineKey
+                   'cedictinfo lineValue
+                   'unicode (charsToUnicode lineKey)
+                   'comparison (charsToComparisonNums hash_frequencySystem lineKey)
+                   'frequency (charsToFreqSystemNums hash_frequencySystem lineKey)
+                   ))))
+   li_li_cedict))
+
+(define (listOfCedictStrAndHashToHash li_strAndHash_cedict)
+  (for/hash ([eachList li_strAndHash_cedict])
+    (values (first eachList) (second eachList))))
+
+(define (generateCedictHashFromSource
+         hash_frequencySystem
+         fun_whichToCompare
+         fun_whichToAppend       
+         str_cedictText)
+  (listOfCedictStrAndHashToHash
+  (nestedCedictToListHashMap hash_frequencySystem
+  (replaceCounterpartWithList fun_whichToCompare fun_whichToAppend
+  (cedictNestedList str_cedictText)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; funktioner til at skrive cedict til filer ;;;;;;;;;;;;;;;
+
+;(define cedict (file->string "../cedictSource/testcedict"))
+(define cedict (file->string "../cedictSource/cedictImproved.txt"))
+
+(define test (cedictNestedList cedict))
+(define test2 (replaceCounterpartWithList first identity test))
+(define test3 (replaceCounterpartWithList second identity test))
+(define ha2 (nestedCedictToListHashMap jundahash test2))
+
+(define ha2b (generateCedictHashFromSource jundahash second identity cedict))
+(define ha3c (generateCedictHashFromSource tzaihash first identity cedict))
+
+;(hash-ref ha2b "%")
+;(hash-ref (hash-ref ha2b "%") 'cedictinfo)
+;(hash-ref (hash-ref ha2b "%") 'unicode)
+
+;skriv en funktion der gemmer denne hashmap til en fil
+
+;(write-to-file ha2b "../cedictMaps/cedictSimp")
+;(write-to-file ha3c "../cedictMaps/cedictTrad")
+
+;(write-to-file ha2b "../cedictMaps/cedictSimpTest")
+;(write-to-file ha3c "../cedictMaps/cedictTradTest")
+
+(+ 1 1)
+
+;;;;;;; write code to serialize data properly ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;https://www.travishinkelman.com/data-serialization-in-r-and-racket/
+; define function for saving data to a rkdt file                     
+
+;(define (save-rktd data path)
+;  (if (serializable? data)
+;      (with-output-to-file path
+;        (lambda () (write (serialize data)))
+;        #:exists 'replace)                       
+;      (error "Data is not serializable")))
+
+; define function for reading data from a rkdt file      
+
+;(define (read-rktd path)
+;  (with-input-from-file path
+;    (lambda () (deserialize (read)))))
+
+;(save-rktd nested-hash "hash.rktd")            ; write hash table to file
+;(equal? nested-hash (read-rktd "hash.rktd"))   ; read hash table from file and compare t
+
+;(save-rktd ha2b "../cedictMaps/cedictSimpSerial.rktd")            ; write hash table to file
+;(save-rktd ha3c "../cedictMaps/cedictTradSerial.rktd")
+;(equal? ha2b (read-rktd "../cedictMaps/cedictSimpSerial.rktd"))   ; read hash table from file and compare t
+;(equal? ha3c (read-rktd "../cedictMaps/cedictTradSerial.rktd"))
+
+;;;;;;;;;;;;;;;;;;;;;;;; faster serialization ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (save-rktd-fast data path)
+      (with-output-to-file path
+        (lambda () (write (s-exp->fasl data)))
+        #:exists 'replace))                       
+
+; define function for reading data from a rkdt file      
+(define (read-rktd-fast path)
+  (with-input-from-file path
+    (lambda () (fasl->s-exp (read)))))
+
+;(save-rktd-fast ha2b "../cedictMaps/cedictSimpSerial.rktd")            ; write hash table to file
+;(save-rktd-fast ha3c "../cedictMaps/cedictTradSerial.rktd")
+;(equal? ha2b (read-rktd-fast "../cedictMaps/cedictSimpSerial.rktd"))   ; read hash table from file and compare t
+;(equal? ha3c (read-rktd-fast "../cedictMaps/cedictTradSerial.rktd"))
+
+;(define features
+;  (let ([tzdata (load-geojson "./data/combined.json" #:verbose #t)])
+;    (prepare-features tzdata)))
+
+(+ 1 0)
+
+(call-with-output-file "../cedictMaps/cedictTradSerial.rktd"
+  (lambda (out) (s-exp->fasl ha3c out))
+  #:exists 'replace)
+(call-with-output-file "../cedictMaps/cedictSimpSerial.rktd"
+  (lambda (out) (s-exp->fasl ha2b out))
+  #:exists 'replace)
+
+(define (load-data path)
+  (call-with-input-file path fasl->s-exp))
+
+;(define readTrad (load-data "../cedictMaps/cedictTradSerial.rktd"))
+;(define readSimp (load-data "../cedictMaps/cedictSimpSerial.rktd"))
+
+(define readTrad (load-data "../cedictMaps/cedictTradDat.dat"))
+(define readSimp (load-data "../cedictMaps/cedictSimpDat.dat"))
+
+(equal? ha2b readSimp)
+(equal? ha3c readTrad)
+(+ 2 5)
+;;slut

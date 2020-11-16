@@ -1,0 +1,28 @@
+
+Jun Da 笪骏 (jda@mtsu.edu)
+
+Data last updated 最近更新: 2004-03-30
+Page last updated 最近更新: 2005-12-21
+URL for this page 本页网址: http://lingua.mtsu.edu/chinese-computing/statistics/char/list.php?Which=TO
+Jun Da's homepage 笪骏网站: http://lingua.mtsu.edu
+Jun Da's Chinese text computing page 中文文本计算网站: http://lingua.mtsu.edu/chinese-computing
+Notes 说明:
+
+    Column 1: Serial number; 第一列：序号
+    Column 2: Character; 第二列：汉字
+    Column 3: Individual raw frequency; 第三列：频率
+    Column 4: Cumulative frequency in percentile; 第四列：累计频率(%)
+    Column 5: Pinyin. 请注意：拼音取自于CEDICT: Chinese-English Dictionary (http://www.mandarintools.com/cedict.html), the online HSK word list (http://www.chinese-forums.com/vocabulary/)和汉语拼音与输入法论坛(http://sh.netsh.com/bbs/1951/)的GBK汉字列表。数字代表声调。如果没有声调则表示轻声。该信息只是提供给用户以参考。其准确性没有校对过。
+    Column 6: English translation; 英文翻译。请注意：英文翻译来源于CEDICT: Chinese-English Dictionary (http://www.mandarintools.com/cedict.html)。目前使用的数据是21 December 2005发布的版本。该信息只是提供给用户以参考。其准确性没有校对过。
+
+1	的	8302698	3.2074998098725	de/di2/di4	(possessive particle)/of, really and truly, aim/clear
+2	一	3728398	4.6478552071336	yi1	one/1/single/a(n)
+3	不	3083707	5.8391534593647	bu4/bu2	(negative prefix)/not/no
+4	是	3017244	7.0047757132801	shi4	is/are/am/yes/to be
+5	了	2588626	8.004814183044	le/liao3/liao4	(modal particle intensifying preceding clause)/(completed action marker), to know/to understand/to know, clear, look afar from a high place
+6	人	2508086	8.9737384252775	ren2	man/person/people
+7	在	2265802	9.8490634683188	zai4	(located) at/in/exist
+8	有	2249248	10.717993367052	you3	to have/there is/there are/to exist/to be
+9	我	1939038	11.467082881851	wo3	I/me/myself
+10	他	1835410	12.176138808736	ta1	he/him
+11	这	1735712	12.846679386027	zhe4/zhei4	this/these, this/these/(sometimes used before a measure word, especially in Beijing)

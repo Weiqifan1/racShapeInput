@@ -16,8 +16,8 @@
 (define (load-data path)
   (call-with-input-file path fasl->s-exp))
 
-(define ttest (load-data "cedictMaps/cedictTradSerial.rktd"))
-(define stest (load-data "cedictMaps/cedictSimpSerial.rktd"))
+(define ttest (load-data "cedictFiles/cedictMaps/cedictTradSerial.rktd"))
+(define stest (load-data "cedictFiles/cedictMaps/cedictSimpSerial.rktd"))
 
 ;(define tdat (load-data "cedictMaps/cedictTradDat.dat"))
 ;(define sdat (load-data "cedictMaps/cedictSimpDat.dat"))
@@ -31,7 +31,51 @@
 ;(hash-ref ttest "髮")
 ;(hash-ref ttest "發")
 
-(+ 3 3)
+;(hash-ref ttest "A")
+
+;testCharacters:
+(define (getFrequencyRank ha_hash str_text)
+  (hash-ref 
+   (hash-ref ha_hash str_text) 'frequencyrank))
+
+(define (allSystemItems ha_hash sym_systemsymbol)
+  (flatten
+  (filter
+   (lambda (li_freqnumbers)
+     (and (equal? 1 (length li_freqnumbers))
+          (< 0 (first li_freqnumbers))))
+  (hash-map
+   (hash-values ha_hash)
+   (lambda (ha_eachItem)
+     (hash-ref ha_eachItem sym_systemsymbol))))))
+
+(define allValues (hash-values stest))
+(define allFreqrank
+  (map
+   (lambda (ha_eachmap)
+     (hash-ref ha_eachmap 'frequencyrank))
+   allValues))
+(define relevantFreq
+  (set->list
+  (list->set
+  (filter
+   (lambda (li_number)
+     (and (equal? 1 (length li_number))
+          (< 0 (first li_number))))
+   allFreqrank))))
+(length relevantFreq);13060 ;12041
+
+;(define tfreqnum (allSystemItems ttest 'frequencyrank))
+;(length tfreqnum)
+
+;(define Aitem (hash-ref ttest "A"))
+
+(hash-ref ttest "A")
+(hash-ref ttest "我")
+
+
+
+"end of test"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;TODO>
