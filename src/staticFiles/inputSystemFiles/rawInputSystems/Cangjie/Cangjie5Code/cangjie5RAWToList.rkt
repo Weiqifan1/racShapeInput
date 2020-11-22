@@ -1,0 +1,85 @@
+#lang racket
+
+(require racket/fasl)
+
+
+(define cangjie5RAW (file->string "../Cangjie5Source/CangJie_textRAW.txt"))
+;(define array1 (substring array1RAW 1 (string-length array1RAW)))
+
+(string-length cangjie5RAW)
+;(substring cangjie5RAW 0 200)
+
+;;;remove # from the code strings
+;(char->integer (first (string->list "\U000FCDE9")))
+(define (removeHashTags li_li_strCodeToLines)
+  (map
+   (lambda (li_eachCodeToChar)
+     (list  (list->string (filter (lambda (eachChar) (not (equal? #\# eachChar)))
+                                  (string->list (first li_eachCodeToChar))))
+            (second li_eachCodeToChar)))
+   li_li_strCodeToLines))
+
+(define (stringToList str_cangjie5Text)
+  (set->list (list->set
+  (removeHashTags 
+  (filter (lambda (eachSubList)
+            (equal? 2 (length eachSubList)))
+  (map (lambda (eachLine)
+         (string-split eachLine #px"[\\s]+"))
+  (string-split str_cangjie5Text #px"\n")))))))
+
+(define cangjieList (stringToList cangjie5RAW))
+;(define badLines
+;  (filter
+;   (lambda (eachList)
+;     (> 11000 (char->integer (first (string->list (second eachList))))))
+;   cangjieList))
+;(length cangjieList)
+
+
+(length cangjieList)
+
+"test"
+
+;;;;;;;;;;;;;;;;;;;;;;;;; nu har jeg cangjie i en liste. Nu skal jeg lave combinationerne. 
+
+(define (nestedListOfLines fun_listElemToUseAsKey li_li_allnestedarray)
+  (let ([li_listElemsToUseAsKey
+         (map
+          (lambda (li_eachnestedlist)
+            (fun_listElemToUseAsKey li_eachnestedlist))
+          li_li_allnestedarray)])
+    (map
+     (lambda (str_eachwantedkey)
+       (list str_eachwantedkey
+             (filter
+              (lambda (li_eacharrayline)
+                (equal? str_eachwantedkey
+                        (fun_listElemToUseAsKey li_eacharrayline)))
+              li_li_allnestedarray)))
+     li_listElemsToUseAsKey)))
+
+;(define charsAsKeys (nestedListOfLines second cangjieList))
+;(define codesAsKeys (nestedListOfLines first cangjieList))
+
+;(call-with-output-file "../Cangjie5Maps/cangjie5CharList.rktd"
+;  (lambda (out) (s-exp->fasl charsAsKeys out))
+;  #:exists 'replace)
+;(call-with-output-file "../Cangjie5Maps/cangjie5CodeList.rktd"
+;  (lambda (out) (s-exp->fasl codesAsKeys out))
+;  #:exists 'replace)
+
+(define (load-data path)
+  (call-with-input-file path fasl->s-exp))
+
+(define readCharList (load-data "../Cangjie5Maps/cangjie5CharList.rktd"))
+(define readCodeList (load-data "../Cangjie5Maps/cangjie5CodeList.rktd"))
+
+;(equal? readCharList charsAsKeys)
+;(equal? readCodeList codesAsKeys)
+
+
+
+
+
+;slut

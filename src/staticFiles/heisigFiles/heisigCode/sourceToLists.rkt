@@ -2,7 +2,6 @@
 (require csv-reading)
 (require racket/fasl)
 
-(+ 2 2)
 
 
 (define (listFromCSVFilepath csvFilePathStr)
