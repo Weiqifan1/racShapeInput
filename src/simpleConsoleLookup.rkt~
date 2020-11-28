@@ -1,0 +1,69 @@
+#lang racket
+
+(require "deserializeStaticFiles.rkt")
+
+(hash-ref cangjie5Code "bmi")
+
+
+;(let consoleProgram ()
+;    (display "Input: ")
+;    (define a (read-line (current-input-port) 'any))
+;    (printf (string-append "you have written: " a "\n" ))
+;    (if (not (equal? a "quit"))
+;        (consoleProgram)
+;        (identity "program has ended")))
+
+(define (processConsoleInput str_userInput)
+  (identity str_userInput))
+
+;console program tager en string fra brugeren og skriver en string som output.
+;outputtet er resultatet af funktionen "processConsoleInput a" .
+;hvis stringen fra brugeren ikke er "quit", vil brugeren blive spurgt igen
+;(let consoleProgram ()
+;    (display "Input: ")
+;    (define a (read-line (current-input-port) 'any))
+;    (printf (string-append "" (processConsoleInput a) "\n"))
+;    (if (not (equal? a "quit"))
+;        (consoleProgram)
+;        (identity "program has ended")))
+
+;(let consoleProgram ()
+;    (display "Input: ")
+;    (define a (read-line (current-input-port) 'any))
+;    (printf (string-append "" (processConsoleInput a) "\n"))
+;    (if (not (equal? a "quit"))
+;        (consoleProgram)
+;        (identity "program has ended")))
+
+
+(define (mylength lst)
+  ; local function iter:
+  (define (iter lst len)
+    (cond
+     [(empty? lst) len]
+     [else (iter (rest lst) (+ len 1))]))
+  ; body of my-length calls iter:
+  (iter lst 0))
+
+
+
+  ; local function iter:
+(define (iter lst)
+  (display "input: ")
+  ;(let ([userInput (read-line (current-input-port) 'any)])
+  (define userInput (read-line (current-input-port) 'any))
+  (printf (string-append userInput "\n"))
+      (cond [(equal? userInput "quit") "the program is over"]
+            [else
+             (display (apply string-append (append lst (list userInput))))
+             (display "\n")
+             (iter (append lst (list userInput)))]))
+
+
+
+
+
+
+
+
+;slut
