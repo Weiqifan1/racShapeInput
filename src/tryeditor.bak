@@ -10,8 +10,8 @@
 
 ;hovedframen. alt i programmet skal gaa gennem den
 (define hovedframe (new frame% [label "Simple Edit"]
-                      [width 500]
-                      [height 500]))
+                      [width 200]
+                      [height 200]))
 
 ; Make a static text message in the frame
 (define msg (new message% [parent hovedframe]
