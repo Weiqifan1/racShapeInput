@@ -19,7 +19,7 @@
   (writeToCommandField (string-append (send commandField get-label) newString)))
 
 (define (handleCmdFieldInput keyEvent)
-  (if (equal? (send keyEvent get-key-code) (identity #\a))
+  (if (equal? (send keyEvent get-key-code) (identity 'f2))
       (addStringToCmdField "A")
       (addStringToCmdField (string (send keyEvent get-key-code)))))
 
@@ -35,7 +35,7 @@
 
 (define mainTextArea (new (class text%
 (define/override (on-char e)
-  (when (and (not (send e get-caps-down))
+  TFFFF(Fwhen (and (not (send e get-caps-down))
              (char? (send e get-key-code)))
     (handleCmdFieldInput e))
     ;(addStringToCmdField (string (send e get-key-code)))
