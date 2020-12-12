@@ -39,14 +39,24 @@
 (define (addStringToCmdField newString)
   (writeToCommandField (string-append (send commandField get-label) newString)))
 
+(define (updatedCommandFieldValue charOrKeyword)
+  (let ([currentCommandField (send commandField get-label)])
+    (if (and (char? charOrKeyword)
+             (char-graphic? charOrKeyword))
+        (string-append currentCommandField (string charOrKeyword))
+        (identity currentCommandField)
+        )))
+
 (define (handleCmdFieldInput keyEvent currentClass)
+  (let* ([charOrKeyword (send keyEvent get-key-code)]
+         [updatedCmd (updatedCommandFieldValue charOrKeyword)])
   (if (equal? (send keyEvent get-key-code) (integer->char 32)) ;space character     
       (begin (send currentClass insert (getResultOfCommandCode (send commandField get-label) currentClass))
              (writeToCommandField "")
              (send currentClass insert #"\backspace")
              )
       (begin (addStringToCmdField (string (send keyEvent get-key-code)))
-             (send currentClass insert #"\backspace"))))
+             (send currentClass insert #"\backspace")))))
 
 ;THE CANDIDATE AREA (ON THE TOP OF THE FRAME)
 (define candidateCanvas (new editor-canvas% [parent firstFrame]))
