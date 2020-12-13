@@ -3,7 +3,7 @@
 
 ;use command field to to generate input for the main text field
 ;this should return a nested list of strings, each list is a lookup result
-(define (getResultOfCommandCode StrCommandCode StrOldCmdField currentClass)
+(define (getResultOfCommandCode StrCommandCode StrOldCmdField Str_inputSystemField currentClass)
   (list (list (string-append  "1a " StrCommandCode)
               (string-append  "1b " StrCommandCode))
         (list (string-append  "2a " StrCommandCode)
@@ -79,10 +79,11 @@
             (identity oldCmdValue))))
 
 (define (handleCmdFieldInput keyEvent currentClass)
-  (let* ([oldCmdField (send commandField get-label)]
+  (let* ([inputSystemField (send inputssytemField get-label)]
+         [oldCmdField (send commandField get-label)]
          [charOrKeyword (send keyEvent get-key-code)]
          [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]
-         [cmdResult (getResultOfCommandCode updatedCmd oldCmdField currentClass)]
+         [cmdResult (getResultOfCommandCode updatedCmd oldCmdField inputSystemField currentClass)]
          [cmdResultStringifyed (createDisplayStringFromCommandResult cmdResult)])
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
       (when (not (equal? "" (send commandField get-label)))
