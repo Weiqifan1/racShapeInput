@@ -53,11 +53,11 @@
   (let* ([charOrKeyword (send keyEvent get-key-code)]
          [updatedCmd (updatedCommandFieldValue charOrKeyword)]
          [cmdResult (getResultOfCommandCode updatedCmd currentClass)])
-  (if (equal? (send keyEvent get-key-code) (integer->char 32)) ;space character     
-      (begin (send currentClass insert cmdResult)
-             (writeToCommandField "")
-             (send currentClass insert #"\backspace")
-             )
+  (if (equal? charOrKeyword (integer->char 32)) ;space character     
+      (when (nor (equal? "" (send commandField get-label)))
+        (begin (send currentClass insert cmdResult)
+        (writeToCommandField "")
+        (send currentClass insert #"\backspace")))
       (begin (writeToCommandField updatedCmd)
              (send currentClass insert #"\backspace")))))
 
@@ -72,7 +72,9 @@
 (define editorTextArea (new (class text%
 (define/override (on-char e)
   (when (and (not (send e get-caps-down))
-             (char? (send e get-key-code)))
+             (char? (send e get-key-code))
+             (or (char-graphic? (send e get-key-code))
+                 (equal? (integer->char 32) (send e get-key-code))))
     (handleCmdFieldInput e this))
     ;(addStringToCmdField (string (send e get-key-code)))
     ;(send this insert #"\backspace")) ;this gives an error in console, but it works
