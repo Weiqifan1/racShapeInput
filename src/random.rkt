@@ -12,7 +12,7 @@
 ;this should return a nested list
 ;the first element should be the inputsystem used
 ;the second should be a list of lookup results.
-(define (getResultOfCommandCode StrCommandCode currentClass)
+(define (getResultOfCommandCode StrCommandCode StrOldCmdField currentClass)
   (string-append  "1 " StrCommandCode))
 
 ;expects a list from the above function, and returns a string suitable for
@@ -56,7 +56,7 @@
   (let* ([oldCmdField (send commandField get-label)]
          [charOrKeyword (send keyEvent get-key-code)]
          [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]
-         [cmdResult (getResultOfCommandCode updatedCmd currentClass)]
+         [cmdResult (getResultOfCommandCode updatedCmd oldCmdField currentClass)]
          [cmdResultStringifyed (createDisplayStringFromCommandResult cmdResult)])
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
       (when (not (equal? "" (send commandField get-label)))
