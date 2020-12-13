@@ -58,7 +58,9 @@
         (begin (send currentClass insert cmdResult)
         (writeToCommandField "")
         (send currentClass insert #"\backspace")))
-      (begin (writeToCommandField updatedCmd)
+      (begin (send candidateTextArea erase)
+             (send candidateTextArea insert cmdResult)
+             (writeToCommandField updatedCmd)
              (send currentClass insert #"\backspace")))))
 
 ;THE CANDIDATE AREA (ON THE TOP OF THE FRAME)
