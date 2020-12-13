@@ -1,25 +1,37 @@
 #lang racket
 (require racket/gui)
 
-;CURRENT FUNCTION
-(define (commandCodeControllerStrToList StrCommandCode)
-  (list "1 first info About First" "2 second info About Second" "3 third info about third"))
-
-;(define (writeCandidateListToFrame li_candidateList currentClass)
-;  ())
-
 ;use command field to to generate input for the main text field
-;this should return a nested list
-;the first element should be the inputsystem used
-;the second should be a list of lookup results.
+;this should return a nested list of strings, each list is a lookup result
 (define (getResultOfCommandCode StrCommandCode StrOldCmdField currentClass)
-  (string-append  "1 " StrCommandCode))
+  (list (list (string-append  "1a " StrCommandCode)
+              (string-append  "1b " StrCommandCode))
+        (list (string-append  "2a " StrCommandCode)
+              (string-append  "2b " StrCommandCode))
+        ))
 
 ;expects a list from the above function, and returns a string suitable for
 ;being printed to the candiate field
-(define (createDisplayStringFromCommandResult str_commandResult)
-  (identity str_commandResult))
+(define (createDisplayStringFromCommandResult li_li_str_commandResult)
+  (apply string-append
+  (map
+   (lambda (eachList)
+     (string-append 
+     (apply string-append
+     (map
+      (lambda (eachStr)
+        (string-append eachStr " "))
+      eachList)) "\n"))
+   li_li_str_commandResult)))
 
+;function that takes a command result and returns the string to be written to the editor window
+(define (elemToWriteFromResult li_li_str_commandResult)
+  (if (and (< 0 (length li_li_str_commandResult))
+           (< 0 (length (first li_li_str_commandResult))))
+      (first (first li_li_str_commandResult))
+      (identity "")))
+
+;(substring oldCmdValue 0 (- (string-length oldCmdValue) 1))
 
 ;write a function that takes list of commandCode results
 ;* it writes the list to the candidate frame
@@ -60,9 +72,10 @@
          [cmdResultStringifyed (createDisplayStringFromCommandResult cmdResult)])
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
       (when (not (equal? "" (send commandField get-label)))
-        (begin (send currentClass insert cmdResultStringifyed)
-        (writeToCommandField "")
-        (send currentClass insert #"\backspace")))
+        (begin
+          (send currentClass insert (elemToWriteFromResult cmdResult))
+          (writeToCommandField "")
+          (send currentClass insert #"\backspace")))
       (begin (send candidateTextArea erase)
              (send candidateTextArea insert cmdResultStringifyed)
              (writeToCommandField updatedCmd)
