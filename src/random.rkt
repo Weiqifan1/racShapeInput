@@ -39,8 +39,10 @@
     (if (and (char? charOrKeyword)
              (char-graphic? charOrKeyword))
         (string-append oldCmdValue (string charOrKeyword))
-        (identity oldCmdValue)
-        ))
+        (if (and (equal? charOrKeyword (integer->char 8))
+                 (< 0 (string-length oldCmdValue)))
+            (substring oldCmdValue 0 (- (string-length oldCmdValue) 1))          
+            (identity oldCmdValue))))
 
 (define (handleCmdFieldInput keyEvent currentClass)
   (let* ([oldCmdField (send commandField get-label)]
@@ -48,7 +50,7 @@
          [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]
          [cmdResult (getResultOfCommandCode updatedCmd currentClass)])
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
-      (when (nor (equal? "" (send commandField get-label)))
+      (when (not (equal? "" (send commandField get-label)))
         (begin (send currentClass insert cmdResult)
         (writeToCommandField "")
         (send currentClass insert #"\backspace")))
@@ -70,7 +72,9 @@
   (when (and (not (send e get-caps-down))
              (char? (send e get-key-code))
              (or (char-graphic? (send e get-key-code))
-                 (equal? (integer->char 32) (send e get-key-code))))
+                 (equal? (send e get-key-code) (integer->char 32)) ;space
+                 (and (equal? (send e get-key-code) (integer->char 8)) ;backspace
+                      (< 0 (string-length (send commandField get-label))))))
     (handleCmdFieldInput e this))
     ;(addStringToCmdField (string (send e get-key-code)))
     ;(send this insert #"\backspace")) ;this gives an error in console, but it works
