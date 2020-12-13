@@ -35,18 +35,17 @@
 (define (writeToCommandField userString)
   (send commandField set-label userString))
 
-(define (updatedCommandFieldValue charOrKeyword)
-  (let ([currentCommandField (send commandField get-label)])
+(define (updatedCommandFieldValue charOrKeyword oldCmdValue)
     (if (and (char? charOrKeyword)
              (char-graphic? charOrKeyword))
-        (string-append currentCommandField (string charOrKeyword))
-        (identity currentCommandField)
-        )))
+        (string-append oldCmdValue (string charOrKeyword))
+        (identity oldCmdValue)
+        ))
 
 (define (handleCmdFieldInput keyEvent currentClass)
   (let* ([oldCmdField (send commandField get-label)]
          [charOrKeyword (send keyEvent get-key-code)]
-         [updatedCmd (updatedCommandFieldValue charOrKeyword)]
+         [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]
          [cmdResult (getResultOfCommandCode updatedCmd currentClass)])
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
       (when (nor (equal? "" (send commandField get-label)))
