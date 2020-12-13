@@ -10,7 +10,7 @@
 
 ;use command field to to generate input for the main text field
 (define (getResultOfCommandCode StrCommandCode currentClass)
-  (identity "hejDer")) 
+  (string-append  "1 " StrCommandCode)) 
 
 ;write a function that takes list of commandCode results
 ;* it writes the list to the candidate frame
@@ -36,8 +36,10 @@
 
 (define preliminaryString "")
 
-(define (addStringToCmdField newString)
-  (writeToCommandField (string-append (send commandField get-label) newString)))
+(define (addStringToCmdField eventKeyCode)
+  (when (and (char? eventKeyCode)
+             (char-graphic? eventKeyCode))
+  (writeToCommandField (string-append (send commandField get-label) (string eventKeyCode)))))
 
 (define (updatedCommandFieldValue charOrKeyword)
   (let ([currentCommandField (send commandField get-label)])
@@ -55,7 +57,7 @@
              (writeToCommandField "")
              (send currentClass insert #"\backspace")
              )
-      (begin (addStringToCmdField (string (send keyEvent get-key-code)))
+      (begin (addStringToCmdField (send keyEvent get-key-code))
              (send currentClass insert #"\backspace")))))
 
 ;THE CANDIDATE AREA (ON THE TOP OF THE FRAME)
