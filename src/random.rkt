@@ -51,9 +51,10 @@
 
 (define (handleCmdFieldInput keyEvent currentClass)
   (let* ([charOrKeyword (send keyEvent get-key-code)]
-         [updatedCmd (updatedCommandFieldValue charOrKeyword)])
+         [updatedCmd (updatedCommandFieldValue charOrKeyword)]
+         [cmdResult (getResultOfCommandCode updatedCmd currentClass)])
   (if (equal? (send keyEvent get-key-code) (integer->char 32)) ;space character     
-      (begin (send currentClass insert (getResultOfCommandCode (send commandField get-label) currentClass))
+      (begin (send currentClass insert cmdResult)
              (writeToCommandField "")
              (send currentClass insert #"\backspace")
              )
