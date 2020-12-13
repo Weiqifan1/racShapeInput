@@ -25,7 +25,7 @@
    li_li_str_commandResult)))
 
 ;function that takes a command result and returns the string to be written to the editor window
-(define (elemToWriteFromResult li_li_str_commandResult)
+(define (elemToWriteFromResult li_li_str_commandResult str_UpdatedCommand)
   (if (and (< 0 (length li_li_str_commandResult))
            (< 0 (length (first li_li_str_commandResult))))
       (first (first li_li_str_commandResult))
@@ -47,6 +47,20 @@
 (define firstFrame (new frame% [label "An editor that allow you to input commands"]
                       [width 500]
                       [height 500]))
+
+;currentInputSystemField
+(define inputssytemField (new message% [parent firstFrame] [label "C"]))
+
+(define (isSingleCapitalLetter str_input)
+  (if (and (equal? 1 (string-length str_input))
+           (< 64 (char->integer (string-ref str_input 0))) ;at least A
+           (> 91 (char->integer (string-ref str_input 0))));not greater than Z
+      #t
+      #f))
+
+(define (updateInputsystmField str_commandFieldContent)
+  (when (isSingleCapitalLetter str_commandFieldContent)
+      (send inputssytemField set-label str_commandFieldContent)))
 
 ;the commands you type should be vissible in this message control
 (define commandField (new message% [parent firstFrame] ;[parent firstFrame]
@@ -72,14 +86,20 @@
          [cmdResultStringifyed (createDisplayStringFromCommandResult cmdResult)])
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
       (when (not (equal? "" (send commandField get-label)))
-        (begin
-          (send currentClass insert (elemToWriteFromResult cmdResult))
-          (writeToCommandField "")
-          (send currentClass insert #"\backspace")))
+          (if (isSingleCapitalLetter updatedCmd)
+              (begin
+                (updateInputsystmField updatedCmd)
+                (writeToCommandField "")
+                (send currentClass insert #"\backspace"))
+              (begin
+                (send currentClass insert (elemToWriteFromResult cmdResult updatedCmd))
+                (writeToCommandField "")
+                (send currentClass insert #"\backspace"))))
       (begin (send candidateTextArea erase)
              (send candidateTextArea insert cmdResultStringifyed)
              (writeToCommandField updatedCmd)
              (send currentClass insert #"\backspace")))))
+
 
 ;THE CANDIDATE AREA (ON THE TOP OF THE FRAME)
 (define candidateCanvas (new editor-canvas% [parent firstFrame]))
