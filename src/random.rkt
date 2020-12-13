@@ -9,8 +9,16 @@
 ;  ())
 
 ;use command field to to generate input for the main text field
+;this should return a nested list
+;the first element should be the inputsystem used
+;the second should be a list of lookup results.
 (define (getResultOfCommandCode StrCommandCode currentClass)
-  (string-append  "1 " StrCommandCode)) 
+  (string-append  "1 " StrCommandCode))
+
+;expects a list from the above function, and returns a string suitable for
+;being printed to the candiate field
+(define (createDisplayStringFromCommandResult str_commandResult)
+  (identity str_commandResult))
 
 
 ;write a function that takes list of commandCode results
@@ -48,14 +56,15 @@
   (let* ([oldCmdField (send commandField get-label)]
          [charOrKeyword (send keyEvent get-key-code)]
          [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]
-         [cmdResult (getResultOfCommandCode updatedCmd currentClass)])
+         [cmdResult (getResultOfCommandCode updatedCmd currentClass)]
+         [cmdResultStringifyed (createDisplayStringFromCommandResult cmdResult)])
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
       (when (not (equal? "" (send commandField get-label)))
-        (begin (send currentClass insert cmdResult)
+        (begin (send currentClass insert cmdResultStringifyed)
         (writeToCommandField "")
         (send currentClass insert #"\backspace")))
       (begin (send candidateTextArea erase)
-             (send candidateTextArea insert cmdResult)
+             (send candidateTextArea insert cmdResultStringifyed)
              (writeToCommandField updatedCmd)
              (send currentClass insert #"\backspace")))))
 
