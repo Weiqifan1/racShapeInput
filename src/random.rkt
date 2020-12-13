@@ -31,17 +31,11 @@
       (first (first li_li_str_commandResult))
       (identity "")))
 
-;(substring oldCmdValue 0 (- (string-length oldCmdValue) 1))
 
-;write a function that takes list of commandCode results
-;* it writes the list to the candidate frame
-;* it asks for a single number keystroke that must be no greater than the list size (max 10)
-;* it then writes the chinese string (the result) to the editor textarea.
-;* it then clears the candidate frame
-
-
-
+;*************************************************************************
 ;***************************** Gui Code **********************************
+;*************************************************************************
+
 
 ;first frame of the program
 (define firstFrame (new frame% [label "An editor that allow you to input commands"]
