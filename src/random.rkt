@@ -12,6 +12,7 @@
 (define (getResultOfCommandCode StrCommandCode currentClass)
   (string-append  "1 " StrCommandCode)) 
 
+
 ;write a function that takes list of commandCode results
 ;* it writes the list to the candidate frame
 ;* it asks for a single number keystroke that must be no greater than the list size (max 10)
@@ -34,13 +35,6 @@
 (define (writeToCommandField userString)
   (send commandField set-label userString))
 
-(define preliminaryString "")
-
-;(define (addStringToCmdField strInput)
-  ;(when (and (char? eventKeyCode)
-   ;          (char-graphic? eventKeyCode))
-;  (writeToCommandField strInput))
-
 (define (updatedCommandFieldValue charOrKeyword)
   (let ([currentCommandField (send commandField get-label)])
     (if (and (char? charOrKeyword)
@@ -50,7 +44,8 @@
         )))
 
 (define (handleCmdFieldInput keyEvent currentClass)
-  (let* ([charOrKeyword (send keyEvent get-key-code)]
+  (let* ([oldCmdField (send commandField get-label)]
+         [charOrKeyword (send keyEvent get-key-code)]
          [updatedCmd (updatedCommandFieldValue charOrKeyword)]
          [cmdResult (getResultOfCommandCode updatedCmd currentClass)])
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
