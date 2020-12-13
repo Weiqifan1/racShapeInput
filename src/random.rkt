@@ -1,6 +1,13 @@
 #lang racket
 (require racket/gui)
 
+;(define (getResultOfCommandCode StrCommandCode StrOldCmdField Str_inputSystemField currentClass)
+;  (list (list (string-append  "1a " StrCommandCode)
+;              (string-append  "1b " StrCommandCode))
+;        (list (string-append  "2a " StrCommandCode)
+;              (string-append  "2b " StrCommandCode))
+;        ))
+
 ;use command field to to generate input for the main text field
 ;this should return a nested list of strings, each list is a lookup result
 (define (getResultOfCommandCode StrCommandCode StrOldCmdField Str_inputSystemField currentClass)
