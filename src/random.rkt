@@ -36,10 +36,10 @@
 
 (define preliminaryString "")
 
-(define (addStringToCmdField eventKeyCode)
-  (when (and (char? eventKeyCode)
-             (char-graphic? eventKeyCode))
-  (writeToCommandField (string-append (send commandField get-label) (string eventKeyCode)))))
+;(define (addStringToCmdField strInput)
+  ;(when (and (char? eventKeyCode)
+   ;          (char-graphic? eventKeyCode))
+;  (writeToCommandField strInput))
 
 (define (updatedCommandFieldValue charOrKeyword)
   (let ([currentCommandField (send commandField get-label)])
@@ -58,7 +58,7 @@
              (writeToCommandField "")
              (send currentClass insert #"\backspace")
              )
-      (begin (addStringToCmdField (send keyEvent get-key-code))
+      (begin (writeToCommandField updatedCmd)
              (send currentClass insert #"\backspace")))))
 
 ;THE CANDIDATE AREA (ON THE TOP OF THE FRAME)
