@@ -36,16 +36,66 @@
 ;*************************** funktioner til udregning
 ;******************************************************************************
 
+;(define (getResultFromCode str_code char_system)
+;  (let* ([li_resultsStrings (hash-ref cangjie5Code str_code)])
+;    (map
+;     (lambda (eachResultString)
+;       (list eachResultString
+;             (if (hash-has-key? heisigTrad eachResultString) (hash-ref heisigTrad eachResultString) (identity ""))
+;             (if (hash-has-key? heisigSimp eachResultString) (hash-ref heisigSimp eachResultString) (identity ""))
+;             (if (hash-has-key? cedictTrad eachResultString) (hash-ref cedictTrad eachResultString) (identity ""))
+;             (if (hash-has-key? cedictSimp eachResultString) (hash-ref cedictSimp eachResultString) (identity ""))))           
+;     li_resultsStrings)))
+
 (define (getResultFromCode str_code char_system)
   (let* ([li_resultsStrings (hash-ref cangjie5Code str_code)])
     (map
      (lambda (eachResultString)
        (list eachResultString
-             (if (hash-has-key? heisigTrad eachResultString) (hash-ref heisigTrad eachResultString) (identity ""))
-             (if (hash-has-key? heisigSimp eachResultString) (hash-ref heisigSimp eachResultString) (identity ""))
-             (if (hash-has-key? cedictTrad eachResultString) (hash-ref cedictTrad eachResultString) (identity ""))
-             (if (hash-has-key? cedictSimp eachResultString) (hash-ref cedictSimp eachResultString) (identity ""))))           
+             (getComparisonNumberFromChineseString eachResultString)
+             (getHeisigInfo eachResultString)))           
      li_resultsStrings)))
+
+;********* get comparison number
+
+(define (largestUnicodeNumber str_inputString)
+  (let ([li_char (string->list str_inputString)])
+    (if (< 0 (length li_char))
+        (last
+          (sort
+          (map (lambda (eachChar) (char->integer)) li_char)))
+        (identity 0))))
+
+(define (comparisonNumOfUnknownString str_input)
+  (* 10
+  (largestUnicodeNumber str_input)))
+
+(define (getComparisonNumberFromChineseString str_chineseString)
+  (if (hash-has-key? cedictTrad str_chineseString)
+       (first (hash-ref (hash-ref cedictTrad str_chineseString) 'comparison))
+       (if (hash-has-key? cedictSimp str_chineseString)
+           (first (hash-ref (hash-ref cedictSimp str_chineseString) 'comparison))
+           (comparisonNumOfUnknownString str_chineseString))))
+
+(number->string 345)
+
+; get heisig info from shinese string
+
+;eks: (getResultFromCode "yhs" #\A)
+;skriv nu en funktion der ogsaa tager hensyn til at et tegn kan findes i baade
+;traditionel og simplificeret heisig
+
+(define (getHeisigInfo str_chineseString)
+  (if (hash-has-key? heisigTrad str_chineseString)
+      (string-append "heisigTrad:"
+                     (number->string (hash-ref (hash-ref heisigTrad str_chineseString) 'heisignumber))
+                     (hash-ref (hash-ref heisigTrad str_chineseString) 'heisigmeaning))
+      (if (hash-has-key? heisigSimp str_chineseString)
+          (string-append "heisigSimp:"
+                     (number->string (hash-ref (hash-ref heisigSimp str_chineseString) 'heisignumber))
+                     (hash-ref (hash-ref heisigSimp str_chineseString) 'heisigmeaning))
+          (identity "notHeisigCharacter"))))
+
 
 
 ;(hash-ref array30Char "方")
