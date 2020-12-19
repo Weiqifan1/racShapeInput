@@ -132,8 +132,9 @@
 
 (define (cedictResultOfMultipleCharToString map_cedictResult)
   (list
-   ;(first (hash-ref map_cedictResult 'corpustype))
-   ;" "
+   (if (equal? 0 (first (hash-ref map_cedictResult 'corpustype)))
+        ""
+        (first (hash-ref map_cedictResult 'corpustype)))
    (appendStringsFromNestedList
     (hash-ref map_cedictResult 'cedictinfo))))
 
