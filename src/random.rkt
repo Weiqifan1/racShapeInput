@@ -48,12 +48,18 @@
       eachList)) "\n"))
    li_li_str_commandResult)))
 
+(define (adjustIndexToFitCommandResult int_numberOfResults int_indexToFetch)
+  (if (< (- int_numberOfResults 1) int_indexToFetch)
+      (- int_numberOfResults 1)
+      int_indexToFetch))
+
 ;function that takes a command result and returns the string to be written to the editor window
-(define (elemToWriteFromResult li_li_str_commandResult str_UpdatedCommand)
+(define (elemToWriteFromResult li_li_str_commandResult str_UpdatedCommand int_indexToFetch)
+  (let ([correctIndex (adjustIndexToFitCommandResult (length li_li_str_commandResult) int_indexToFetch)])
   (if (and (< 0 (length li_li_str_commandResult))
            (< 0 (length (first li_li_str_commandResult))))
-      (first (first li_li_str_commandResult))
-      (identity "")))
+      (first (list-ref li_li_str_commandResult correctIndex))
+      (identity ""))))
 
 
 ;*************************************************************************
@@ -96,16 +102,53 @@
             (substring oldCmdValue 0 (- (string-length oldCmdValue) 1))          
             (identity oldCmdValue))))
 
+;(define (getFirstCapitalLetter StrCommandCode Str_inputSystemField)
+;  (if (and (< 0 (string-length StrCommandCode))
+;           (< 64 (char->integer (string-ref StrCommandCode 0))) ;64 == A-1
+;           (> 91 (char->integer (string-ref StrCommandCode 0))));91 == Z+1
+;      (string-ref StrCommandCode 0)
+;      (string-ref Str_inputSystemField 0)))
+
+
+(define (stringContainsBothCodeAndCapitalLetterSelector str_inputString)
+  (if (< 1 (string-length str_inputString))
+      (< 0 (length
+        (filter (lambda (eachChar) (char-upper-case? eachChar))
+        (string->list str_inputString))))
+      #f))
+
+(define (getLastCapitalLetter str_inputField)
+  (if (and (< 1 (string-length str_inputField))
+           (stringContainsBothCodeAndCapitalLetterSelector str_inputField))
+      (string
+        (last
+        (filter (lambda (char_eachchar) (char-upper-case? char_eachchar)) 
+        (list-tail (string->list str_inputField) 1))))
+      ""))
+
+(define (getIndexFromCapitalLetter str_capitalLetter)
+  (if (< 0 (string-length str_capitalLetter))
+      (-
+        (char->integer
+        (last
+        (string->list str_capitalLetter))) 65)
+      (identity 0)))
+
+(define (getIndexFromInputField str_inputField)
+  (getIndexFromCapitalLetter
+    (getLastCapitalLetter  str_inputField)))
+
 (define (handleCmdFieldInput keyEvent currentClass)
-  (let* ([inputSystemField (send inputssytemField get-label)]
+  (let* ([inputSystemField (send inputssytemField get-label)]        
          [oldCmdField (send commandField get-label)]
          [charOrKeyword (send keyEvent get-key-code)]
          [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]
+         [int_indexToFetch (getIndexFromInputField updatedCmd)]
          [cmdResult (getResultOfCommandCode updatedCmd oldCmdField inputSystemField currentClass)]
          [cmdResultStringifyed (createDisplayStringFromCommandResult cmdResult)])
-  (doHandleCmdFieldInput inputSystemField oldCmdField charOrKeyword updatedCmd cmdResult cmdResultStringifyed currentClass)))
+  (doHandleCmdFieldInput inputSystemField int_indexToFetch oldCmdField charOrKeyword updatedCmd cmdResult cmdResultStringifyed currentClass)))
 
-(define (doHandleCmdFieldInput inputSystemField oldCmdField charOrKeyword updatedCmd cmdResult cmdResultStringifyed currentClass)
+(define (doHandleCmdFieldInput inputSystemField int_indexToFetch oldCmdField charOrKeyword updatedCmd cmdResult cmdResultStringifyed currentClass)
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
       (when (not (equal? "" (send commandField get-label)))
           (if (isSingleCapitalLetter updatedCmd)
@@ -115,7 +158,7 @@
                 (send currentClass insert #"\backspace")
                 )
               (begin
-                (send currentClass insert (elemToWriteFromResult cmdResult updatedCmd))
+                (send currentClass insert (elemToWriteFromResult cmdResult updatedCmd int_indexToFetch))
                 (writeToCommandField "")
                 (send currentClass insert #"\backspace")
                 )))
