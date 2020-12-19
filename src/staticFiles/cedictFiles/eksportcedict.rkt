@@ -11,8 +11,8 @@
 (define tcedict (load-data "cedictMaps/cedictTradSerial.rktd"))
 (define scedict (load-data "cedictMaps/cedictSimpSerial.rktd"))
 
-;(hash-ref tcedict "髮")
-;(hash-ref scedict "发")
+(hash-ref tcedict "髮")
+(hash-ref scedict "发")
 
 
 

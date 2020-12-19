@@ -1,6 +1,21 @@
 #lang racket
 (require racket/gui)
 
+(require "serializedDataController.rkt")
+
+;(provide getResultFromCode)
+
+;;method example:
+;(convertCommandCodeToList "hq" "a" "A");
+;'(("牛"
+;   "hq"
+;   791
+;   "HeisigTrad:235 cow HeisigSimp:252 cow"
+;   "traditional freq:791 牛牛[Niu2][niu2]/surname Niu/ [niu2]/ox/cow/bull/CL:條|条[tiao2],頭|头[tou2]/newton (abbr. for 牛頓|牛顿[niu2 dun4])/(slang) awesome/")
+;  ("牜" "hq" 292760 "HeisigTrad:none HeisigSimp:none" "no cedict entry")
+;  ("𥬄" "hq" 1543720 "HeisigTrad:none HeisigSimp:none" "no cedict entry")
+;  ("\U000FB629" "hq" 10296730 "HeisigTrad:none HeisigSimp:none" "no cedict entry"))
+
 ;(define (getResultOfCommandCode StrCommandCode StrOldCmdField Str_inputSystemField currentClass)
 ;  (list (list (string-append  "1a " StrCommandCode)
 ;              (string-append  "1b " StrCommandCode))
@@ -11,11 +26,13 @@
 ;use command field to to generate input for the main text field
 ;this should return a nested list of strings, each list is a lookup result
 (define (getResultOfCommandCode StrCommandCode StrOldCmdField Str_inputSystemField currentClass)
-  (list (list (string-append  "1a " StrCommandCode)
-              (string-append  "1b " StrCommandCode))
-        (list (string-append  "2a " StrCommandCode)
-              (string-append  "2b " StrCommandCode))
-        ))
+  (if (< 0 (string-length StrCommandCode))
+      (let ([lookupResult (convertCommandCodeToList StrCommandCode Str_inputSystemField)])
+        (if (equal? '() lookupResult)
+            (list (list (string-append  "no result " StrCommandCode) "") (list "" ""))
+            (identity lookupResult)))
+      ;(convertCommandCodeToList StrOldCmdField "" Str_inputSystemField)))
+      (list (list (string-append  "no result " StrCommandCode) "") (list "" ""))))
 
 ;expects a list from the above function, and returns a string suitable for
 ;being printed to the candiate field
@@ -27,7 +44,7 @@
      (apply string-append
      (map
       (lambda (eachStr)
-        (string-append eachStr " "))
+        (string-append (if (number? eachStr) (number->string eachStr) (identity eachStr)) " "))
       eachList)) "\n"))
    li_li_str_commandResult)))
 
@@ -86,21 +103,26 @@
          [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]
          [cmdResult (getResultOfCommandCode updatedCmd oldCmdField inputSystemField currentClass)]
          [cmdResultStringifyed (createDisplayStringFromCommandResult cmdResult)])
+  (doHandleCmdFieldInput inputSystemField oldCmdField charOrKeyword updatedCmd cmdResult cmdResultStringifyed currentClass)))
+
+(define (doHandleCmdFieldInput inputSystemField oldCmdField charOrKeyword updatedCmd cmdResult cmdResultStringifyed currentClass)
   (if (equal? charOrKeyword (integer->char 32)) ;space character     
       (when (not (equal? "" (send commandField get-label)))
           (if (isSingleCapitalLetter updatedCmd)
               (begin
                 (updateInputsystmField updatedCmd)
                 (writeToCommandField "")
-                (send currentClass insert #"\backspace"))
+                (send currentClass insert #"\backspace")
+                )
               (begin
                 (send currentClass insert (elemToWriteFromResult cmdResult updatedCmd))
                 (writeToCommandField "")
-                (send currentClass insert #"\backspace"))))
+                (send currentClass insert #"\backspace")
+                )))
       (begin (send candidateTextArea erase)
              (send candidateTextArea insert cmdResultStringifyed)
              (writeToCommandField updatedCmd)
-             (send currentClass insert #"\backspace")))))
+             (send currentClass insert #"\backspace"))))
 
 
 ;THE CANDIDATE AREA (ON THE TOP OF THE FRAME)

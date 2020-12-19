@@ -2,16 +2,9 @@
 
 (require "deserializeStaticFiles.rkt")
 
+(provide convertCommandCodeToList)
 
-
-;returns char
-(define (getFirstCapitalLetter StrCommandCode Str_inputSystemField)
-  (if (and (< 0 (string-length StrCommandCode))
-           (< 64 (char->integer (string-ref StrCommandCode 0))) ;A
-           (> 91 (char->integer (string-ref StrCommandCode 0)))) ;Z
-      (string-ref StrCommandCode 0)
-      (string-ref Str_inputSystemField 0)))
-
+;; handle capital letters
 (define (removeCapitalLetters StrCommandCode)
   (let ([inputList (string->list StrCommandCode)])
     (list->string
@@ -20,50 +13,20 @@
        (not (char-upper-case? eachChar)))
      inputList))))
 
+(define (getFirstCapitalLetter StrCommandCode Str_inputSystemField)
+  (if (and (< 0 (string-length StrCommandCode))
+           (< 64 (char->integer (string-ref StrCommandCode 0))) ;64 == A-1
+           (> 91 (char->integer (string-ref StrCommandCode 0))));91 == Z+1
+      (string-ref StrCommandCode 0)
+      (string-ref Str_inputSystemField 0)))
 
-;(define (getResultOfCommandCode StrCommandCode StrOldCmdField Str_inputSystemField currentClass)
-(define (convertCommandCodeToList str_commandCode StrOldCmdField Str_inputSystemField)
-  (let* ([char_chosenSystem (getFirstCapitalLetter str_commandCode  Str_inputSystemField)]
-         [oldCode (removeCapitalLetters StrOldCmdField)]
-         [newCode (removeCapitalLetters str_commandCode)])
-    (if
-      (and (< 0 (string-length newCode))
-           (not (equal? oldCode newCode)))
-      (getResultFromCode newCode char_chosenSystem)
-      ('()))))
-
-;*******************************************************************************
-;*************************** funktioner til udregning
-;******************************************************************************
-
-;(define (getResultFromCode str_code char_system)
-;  (let* ([li_resultsStrings (hash-ref cangjie5Code str_code)])
-;    (map
-;     (lambda (eachResultString)
-;       (list eachResultString
-;             (if (hash-has-key? heisigTrad eachResultString) (hash-ref heisigTrad eachResultString) (identity ""))
-;             (if (hash-has-key? heisigSimp eachResultString) (hash-ref heisigSimp eachResultString) (identity ""))
-;             (if (hash-has-key? cedictTrad eachResultString) (hash-ref cedictTrad eachResultString) (identity ""))
-;             (if (hash-has-key? cedictSimp eachResultString) (hash-ref cedictSimp eachResultString) (identity ""))))           
-;     li_resultsStrings)))
-
-(define (getResultFromCode str_code char_system)
-  (let* ([li_resultsStrings (hash-ref cangjie5Code str_code)])
-    (map
-     (lambda (eachResultString)
-       (list eachResultString
-             (getComparisonNumberFromChineseString eachResultString)
-             (getHeisigInfo eachResultString)))           
-     li_resultsStrings)))
-
-;********* get comparison number
-
+;;handle unicode and comparison numbers
 (define (largestUnicodeNumber str_inputString)
   (let ([li_char (string->list str_inputString)])
     (if (< 0 (length li_char))
         (last
           (sort
-          (map (lambda (eachChar) (char->integer)) li_char)))
+          (map (lambda (eachChar) (char->integer eachChar)) li_char) <))
         (identity 0))))
 
 (define (comparisonNumOfUnknownString str_input)
@@ -77,34 +40,43 @@
            (first (hash-ref (hash-ref cedictSimp str_chineseString) 'comparison))
            (comparisonNumOfUnknownString str_chineseString))))
 
-(number->string 345)
+;this method always return cangjie character results
+(define (getListOfInputSystemStrings str_commandCode Str_inputSystemField)
+  (if (and (< 0 (string-length str_commandCode) )
+           (hash-has-key? cangjie5Code str_commandCode))
+      (hash-ref cangjie5Code str_commandCode)
+      '()))
 
-; get heisig info from shinese string
+(define (nestedListOfUnicodeAndStrings li_listOfCharsFromInputSystem)
+  (if (equal? li_listOfCharsFromInputSystem '())
+      '()
+      (map
+       (lambda (str_eachChineseString)
+         (list (getComparisonNumberFromChineseString str_eachChineseString)
+               str_eachChineseString))
+       li_listOfCharsFromInputSystem)))
 
-;eks: (getResultFromCode "yhs" #\A)
-;skriv nu en funktion der ogsaa tager hensyn til at et tegn kan findes i baade
-;traditionel og simplificeret heisig
-
-(define (getHeisigInfo str_chineseString)
-  (if (hash-has-key? heisigTrad str_chineseString)
-      (string-append "heisigTrad:"
-                     (number->string (hash-ref (hash-ref heisigTrad str_chineseString) 'heisignumber))
-                     (hash-ref (hash-ref heisigTrad str_chineseString) 'heisigmeaning))
-      (if (hash-has-key? heisigSimp str_chineseString)
-          (string-append "heisigSimp:"
-                     (number->string (hash-ref (hash-ref heisigSimp str_chineseString) 'heisignumber))
-                     (hash-ref (hash-ref heisigSimp str_chineseString) 'heisigmeaning))
-          (identity "notHeisigCharacter"))))
-
-
-
-;(hash-ref array30Char "方")
-;(hash-ref array30Code "yhs")
-;(hash-ref cangjie5Char "方")
-;(hash-ref cangjie5Code "yhs")
+(define (sortNestedList li_numberAndChineseString)
+  (if (equal? li_numberAndChineseString '())
+      '()
+      (map
+       (lambda (li_numberAndString)
+         (filter
+          (lambda (numberOrString) (string? numberOrString))
+          li_numberAndString))
+       (sort li_numberAndChineseString #:key first <))))
 
 
-(+ 5 7)
+(define (convertCommandCodeToList str_commandCode Str_inputSystemField)
+  (let* ([str_updatedInputMethodLetter (getFirstCapitalLetter  str_commandCode Str_inputSystemField)]
+         [str_cleanCommandCode (removeCapitalLetters str_commandCode)]
+         [listOfCharsFromInputSystem (getListOfInputSystemStrings str_cleanCommandCode str_updatedInputMethodLetter)]
+         [nestedList (nestedListOfUnicodeAndStrings listOfCharsFromInputSystem)]
+         [sortedList (sortNestedList nestedList)])
+    (identity sortedList)))
+
+
+;******
 
 
 ;slut
