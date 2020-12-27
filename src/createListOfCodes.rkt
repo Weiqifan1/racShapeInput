@@ -57,7 +57,7 @@
 
 
 (define (getListOfCodesFromCode str_code)
-  (repStar usedCharsTest (list str_code)))
+  (repStar usedChars (list str_code)))
 
 ;(getListOfCodesFromCode "abc*d")
 

@@ -74,6 +74,20 @@
 ;      (hash-ref cangjie5Code str_commandCode)
 ;      '()))
 
+(define (codeListToString li_str_codes)
+  (if (equal? '() li_str_codes)
+      ""
+      (string-trim
+      (apply
+       string-append
+       (map (lambda (eachCode) (string-append eachCode " "))
+       li_str_codes)))))
+
+(define (getCodesAsStringFromChinese str_chinese hash_inputSystemToCode)
+  (if (hash-has-key? hash_inputSystemToCode str_chinese)
+      (codeListToString (hash-ref hash_inputSystemToCode str_chinese))
+      ""))
+
 (define (nestedListOfUnicodeAndStrings li_listOfCharsFromInputSystem str_cleanCommandCode)
   (if (equal? li_listOfCharsFromInputSystem '())
       '()
@@ -82,7 +96,8 @@
          (list (getComparisonNumberFromChineseString str_eachChineseString)
                str_eachChineseString
                ;;;;;;;;;;;;;;;;;;;;;;;;;; 2020 12 27 ;;;;;;;;;;;;;;;;;;;;;;;;;;; instead of the clean command code, I must write the correct lookup code
-               str_cleanCommandCode
+               ;str_cleanCommandCode
+               (getCodesAsStringFromChinese str_eachChineseString cangjie5Char)
                ;;call here the methods needed to get information about the chineseStrings to write
                (getHeisigInfo str_eachChineseString)
                (codeToCedictResultString str_eachChineseString cedictTrad cedictSimp)               
@@ -91,13 +106,14 @@
 
 (define (sortNestedList li_li_numberAndChineseString)
   (if (equal? li_li_numberAndChineseString '())
-      '()
+      '()   
       (map
        (lambda (li_numberAndString)
          (filter
           (lambda (numberOrString) (string? numberOrString))
           li_numberAndString))
-       (sort li_li_numberAndChineseString #:key first <))))
+       (sort li_li_numberAndChineseString #:key first <))
+      ))
 
 
 (define (convertCommandCodeToList str_commandCode Str_inputSystemField)
