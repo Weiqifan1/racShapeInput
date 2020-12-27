@@ -1,6 +1,6 @@
 #lang racket
 
-(require "deserializeStaticFiles.rkt")
+(require "deserializeStaticFiles.rkt" "createListOfCodes.rkt")
 
 (provide convertCommandCodeToList)
 ;(convertCommandCodeToList StrCommandCode Str_inputSystemField)
@@ -42,12 +42,37 @@
            (first (hash-ref (hash-ref cedictSimp str_chineseString) 'comparison))
            (comparisonNumOfUnknownString str_chineseString))))
 
-;this method always return cangjie character results
-(define (getListOfInputSystemStrings str_commandCode Str_inputSystemField)
-  (if (and (< 0 (string-length str_commandCode) )
-           (hash-has-key? cangjie5Code str_commandCode))
-      (hash-ref cangjie5Code str_commandCode)
+;; ************************** get list of codes from raw code ***********************************
+;(define (getCodeListFromRawCode str_rawCode)
+;  ())
+
+
+
+;; ************************** get chinese character results from list of codes **********************************
+
+;this method returns pairs of inputStrings and a list of the codes used to write it.
+;for now it only returns cangjie character results 
+(define (getListOfInputSystemStringsAndCodeListPairs str_commandCode Str_inputSystemField)
+  (let ([listOfCodes (getListOfCodesFromCode str_commandCode)])
+    (flatten
+    (map
+     (lambda (eachCode)
+    (if (and (< 0 (string-length eachCode) )
+           (hash-has-key? cangjie5Code eachCode))
+
+        (hash-ref cangjie5Code eachCode)
       '()))
+    listOfCodes)    
+    )))
+
+
+;this is the old "getListOfInputSystemStrings" i can uncomment it if the above wont work
+;this method always return cangjie character results
+;(define (getListOfInputSystemStrings str_commandCode Str_inputSystemField)
+;  (if (and (< 0 (string-length str_commandCode) )
+;           (hash-has-key? cangjie5Code str_commandCode))
+;      (hash-ref cangjie5Code str_commandCode)
+;      '()))
 
 (define (nestedListOfUnicodeAndStrings li_listOfCharsFromInputSystem str_cleanCommandCode)
   (if (equal? li_listOfCharsFromInputSystem '())
@@ -56,11 +81,11 @@
        (lambda (str_eachChineseString)
          (list (getComparisonNumberFromChineseString str_eachChineseString)
                str_eachChineseString
+               ;;;;;;;;;;;;;;;;;;;;;;;;;; 2020 12 27 ;;;;;;;;;;;;;;;;;;;;;;;;;;; instead of the clean command code, I must write the correct lookup code
                str_cleanCommandCode
                ;;call here the methods needed to get information about the chineseStrings to write
                (getHeisigInfo str_eachChineseString)
-               (codeToCedictResultString str_eachChineseString cedictTrad cedictSimp)
-               
+               (codeToCedictResultString str_eachChineseString cedictTrad cedictSimp)               
                ))
        li_listOfCharsFromInputSystem)))
 
@@ -78,8 +103,8 @@
 (define (convertCommandCodeToList str_commandCode Str_inputSystemField)
   (let* ([str_updatedInputMethodLetter (getFirstCapitalLetter  str_commandCode Str_inputSystemField)]
          [str_cleanCommandCode (removeCapitalLetters str_commandCode)]
-         [listOfCharsFromInputSystem (getListOfInputSystemStrings str_cleanCommandCode str_updatedInputMethodLetter)]
-         [nestedList (nestedListOfUnicodeAndStrings listOfCharsFromInputSystem str_cleanCommandCode)]
+         [listOfCharCodeListPairsFromInputSystem (getListOfInputSystemStringsAndCodeListPairs str_cleanCommandCode str_updatedInputMethodLetter)]
+         [nestedList (nestedListOfUnicodeAndStrings listOfCharCodeListPairsFromInputSystem str_cleanCommandCode)]
          [sortedList (sortNestedList nestedList)])
     (identity sortedList)))
 
