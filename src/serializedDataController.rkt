@@ -52,15 +52,15 @@
 
 ;this method returns pairs of inputStrings and a list of the codes used to write it.
 ;for now it only returns cangjie character results 
-(define (getListOfInputSystemStringsAndCodeListPairs str_commandCode Str_inputSystemField)
+(define (getListOfInputSystemStringsAndCodeListPairs str_commandCode Str_inputSystemField hash_inputSystemCodeToChar)
   (let ([listOfCodes (getListOfCodesFromCode str_commandCode)])
     (flatten
     (map
      (lambda (eachCode)
     (if (and (< 0 (string-length eachCode) )
-           (hash-has-key? cangjie5Code eachCode))
+           (hash-has-key? hash_inputSystemCodeToChar eachCode))
 
-        (hash-ref cangjie5Code eachCode)
+        (hash-ref hash_inputSystemCodeToChar eachCode)
       '()))
     listOfCodes)    
     )))
@@ -88,7 +88,7 @@
       (codeListToString (hash-ref hash_inputSystemToCode str_chinese))
       ""))
 
-(define (nestedListOfUnicodeAndStrings li_listOfCharsFromInputSystem str_cleanCommandCode)
+(define (nestedListOfUnicodeAndStrings li_listOfCharsFromInputSystem str_cleanCommandCode inputSystemCharToCode)
   (if (equal? li_listOfCharsFromInputSystem '())
       '()
       (map
@@ -97,7 +97,7 @@
                str_eachChineseString
                ;;;;;;;;;;;;;;;;;;;;;;;;;; 2020 12 27 ;;;;;;;;;;;;;;;;;;;;;;;;;;; instead of the clean command code, I must write the correct lookup code
                ;str_cleanCommandCode
-               (getCodesAsStringFromChinese str_eachChineseString cangjie5Char)
+               (getCodesAsStringFromChinese str_eachChineseString inputSystemCharToCode)
                ;;call here the methods needed to get information about the chineseStrings to write
                (getHeisigInfo str_eachChineseString)
                (codeToCedictResultString str_eachChineseString cedictTrad cedictSimp)               
@@ -115,12 +115,12 @@
        (sort li_li_numberAndChineseString #:key first <))
       ))
 
-
+;TODO: 2020 12 27 I need to handle which inputsystem that gets used
 (define (convertCommandCodeToList str_commandCode Str_inputSystemField)
   (let* ([str_updatedInputMethodLetter (getFirstCapitalLetter  str_commandCode Str_inputSystemField)]
          [str_cleanCommandCode (removeCapitalLetters str_commandCode)]
-         [listOfCharCodeListPairsFromInputSystem (getListOfInputSystemStringsAndCodeListPairs str_cleanCommandCode str_updatedInputMethodLetter)]
-         [nestedList (nestedListOfUnicodeAndStrings listOfCharCodeListPairsFromInputSystem str_cleanCommandCode)]
+         [listOfCharCodeListPairsFromInputSystem (getListOfInputSystemStringsAndCodeListPairs str_cleanCommandCode str_updatedInputMethodLetter cangjie5Code)]
+         [nestedList (nestedListOfUnicodeAndStrings listOfCharCodeListPairsFromInputSystem str_cleanCommandCode cangjie5Char)]
          [sortedList (sortNestedList nestedList)])
     (identity sortedList)))
 
