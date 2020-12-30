@@ -19,8 +19,8 @@
   (if (and (< 0 (string-length StrCommandCode))
            (< 64 (char->integer (string-ref StrCommandCode 0))) ;64 == A-1
            (> 91 (char->integer (string-ref StrCommandCode 0))));91 == Z+1
-      (string-ref StrCommandCode 0)
-      (string-ref Str_inputSystemField 0)))
+      (string (string-ref StrCommandCode 0))
+      (string (string-ref Str_inputSystemField 0))))
 
 ;;handle unicode and comparison numbers
 (define (largestUnicodeNumber str_inputString)
@@ -115,12 +115,21 @@
        (sort li_li_numberAndChineseString #:key first <))
       ))
 
+;;;;;;;; select the inputsystem to use
+(define (selectinputsystemlist str_methodletter)
+  (if (hash-has-key? inputhash str_methodletter)
+      (hash-ref inputhash str_methodletter)
+      alternative))
+
+
+
 ;TODO: 2020 12 27 I need to handle which inputsystem that gets used
 (define (convertCommandCodeToList str_commandCode Str_inputSystemField)
   (let* ([str_updatedInputMethodLetter (getFirstCapitalLetter  str_commandCode Str_inputSystemField)]
+         [inputlist (selectinputsystemlist str_updatedInputMethodLetter)]
          [str_cleanCommandCode (removeCapitalLetters str_commandCode)]
-         [listOfCharCodeListPairsFromInputSystem (getListOfInputSystemStringsAndCodeListPairs str_cleanCommandCode str_updatedInputMethodLetter cangjie5Code)]
-         [nestedList (nestedListOfUnicodeAndStrings listOfCharCodeListPairsFromInputSystem str_cleanCommandCode cangjie5Char)]
+         [listOfCharCodeListPairsFromInputSystem (getListOfInputSystemStringsAndCodeListPairs str_cleanCommandCode str_updatedInputMethodLetter (first inputlist))]
+         [nestedList (nestedListOfUnicodeAndStrings listOfCharCodeListPairsFromInputSystem str_cleanCommandCode (second inputlist))]
          [sortedList (sortNestedList nestedList)])
     (identity sortedList)))
 
