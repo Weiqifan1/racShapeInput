@@ -30,8 +30,7 @@
       (let ([lookupResult (convertCommandCodeToList StrCommandCode Str_inputSystemField)])
         (if (equal? '() lookupResult)
             (list (list (string-append  "no result " StrCommandCode) "") (list "" ""))
-            (reverse lookupResult))) ;the outer list has to be reversed because
-                                       ;we want to see the most important results at the bottom
+            (identity lookupResult)))
       ;(convertCommandCodeToList StrOldCmdField "" Str_inputSystemField)))
       (list (list (string-append  "no result " StrCommandCode) "") (list "" ""))))
 
@@ -135,24 +134,17 @@
         (string->list str_capitalLetter))) 65)
       (identity 0)))
 
-;it is needed to reverse the priority, so that A get the last member of the list
-;B the second-to-last and so on
-(define (getIndexInReverseList str_capitalLetter int_lengthOfResultList)
-  (let* ([hierachySpot (getIndexFromCapitalLetter str_capitalLetter)])
-    (- (- int_lengthOfResultList 1) hierachySpot)))
-
-(define (getIndexFromInputField str_inputField int_lengthOfResultList)
-  (getIndexInReverseList
-    (getLastCapitalLetter  str_inputField) int_lengthOfResultList))
+(define (getIndexFromInputField str_inputField)
+  (getIndexFromCapitalLetter
+    (getLastCapitalLetter  str_inputField)))
 
 (define (handleCmdFieldInput keyEvent currentClass)
   (let* ([inputSystemField (send inputssytemField get-label)]        
          [oldCmdField (send commandField get-label)]
          [charOrKeyword (send keyEvent get-key-code)]
-         [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]     
+         [updatedCmd (updatedCommandFieldValue charOrKeyword oldCmdField)]
+         [int_indexToFetch (getIndexFromInputField updatedCmd)]
          [cmdResult (getResultOfCommandCode updatedCmd oldCmdField inputSystemField currentClass)]
-         [lengthOfResultList (length cmdResult)]
-         [int_indexToFetch (getIndexFromInputField updatedCmd lengthOfResultList)]
          [cmdResultStringifyed (createDisplayStringFromCommandResult cmdResult)])
   (doHandleCmdFieldInput inputSystemField int_indexToFetch oldCmdField charOrKeyword updatedCmd cmdResult cmdResultStringifyed currentClass)))
 
